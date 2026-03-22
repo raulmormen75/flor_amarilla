@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flor Amarilla Virtual</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;800&display=swap');
+
+    :root {
+      --bg-gradient: linear-gradient(135deg, #fffcf0 0%, #fff9e3 100%);
+      --petal-color: #ffd700;
+      --petal-shadow: #f39c12;
+      --center-color: #3e2723;
+      --stem-color: #2d5a27;
+      --leaf-color: #4caf50;
+      --text-color: #5d4037;
+      --accent-glow: rgba(255, 215, 0, 0.4);
+      --btn-glow: rgba(255, 212, 0, 0.6);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg-gradient);
+      overflow: hidden;
+      color: var(--text-color);
+    }
+
+    /* Floating Blurs */
+    .blur {
+      position: absolute;
+      width: 40vw;
+      height: 40vw;
+      background: var(--accent-glow);
+      filter: blur(80px);
+      border-radius: 50%;
+      z-index: -1;
+      animation: drift 15s ease-in-out infinite alternate;
+    }
+
+    .blur-1 { top: -10%; left: -10%; }
+    .blur-2 { bottom: -10%; right: -10%; background: rgba(255, 165, 0, 0.2); }
+
+    @keyframes drift {
+      from { transform: translate(0, 0) scale(1); }
+      to { transform: translate(50px, 30px) scale(1.1); }
+    }
+
+    .container {
+      width: 100%;
+      max-width: 800px;
+      padding: 2rem;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    h1 {
+      font-size: clamp(1.4rem, 4.5vw, 2.2rem);
+      font-weight: 800;
+      margin-bottom: 1.5rem;
+      opacity: 0.9;
+      line-height: 1.2;
+      text-wrap: balance;
+    }
+
+    /* Flower CSS Architecture */
+    .flower-box {
+      position: relative;
+      width: 300px;
+      height: 380px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      margin: 10px 0;
+    }
+
+    .stem {
+      width: 8px;
+      height: 0;
+      background: linear-gradient(to bottom, var(--stem-color), #1a3a16);
+      border-radius: 4px;
+      position: relative;
+      transition: height 1.8s cubic-bezier(0.19, 1, 0.22, 1);
+    }
+
+    .flower-box.active .stem {
+      height: 250px;
+    }
+
+    .leaf {
+      position: absolute;
+      width: 75px;
+      height: 42px;
+      background: var(--leaf-color);
+      opacity: 0;
+      transition: opacity 0.6s ease 0.8s, transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.8s;
+    }
+
+    /* Left leaf: attached to left edge of stem, wide base on right, tip on left */
+    .leaf-left {
+      right: 100%;
+      top: 110px;
+      transform-origin: right center;
+      border-radius: 100% 15% 15% 100% / 50% 40% 40% 50%;
+      box-shadow: inset -5px -5px 10px rgba(0,0,0,0.15);
+      transform: rotate(-20deg) scale(0); /* tip pointing left-down */
+    }
+
+    .leaf-left::after {
+      content: '';
+      position: absolute;
+      left: 10%; top: 50%; width: 80%; height: 2px;
+      background: rgba(0,0,0,0.08);
+      transform: translateY(-50%) rotate(2deg);
+    }
+
+    /* Right leaves: attached to right edge of stem, wide base on left, tip on right */
+    .leaf-right {
+      left: 100%;
+      transform-origin: left center;
+      border-radius: 15% 100% 100% 15% / 40% 50% 50% 40%;
+      box-shadow: inset 5px -5px 10px rgba(0,0,0,0.15);
+    }
+
+    .leaf-right::after {
+      content: '';
+      position: absolute;
+      left: 10%; top: 50%; width: 80%; height: 2px;
+      background: rgba(0,0,0,0.08);
+      transform: translateY(-50%) rotate(-2deg);
+    }
+
+    .leaf-right-1 {
+      top: 90px;
+      transform: rotate(20deg) scale(0); 
+    }
+
+    .leaf-right-2 {
+      top: 160px;
+      transform: rotate(10deg) scale(0); 
+    }
+
+    .flower-box.active .leaf-left {
+      opacity: 1;
+      transform: rotate(-20deg) scale(1);
+    }
+
+    .flower-box.active .leaf-right-1 {
+      opacity: 1;
+      transform: rotate(20deg) scale(1);
+    }
+
+    .flower-box.active .leaf-right-2 {
+      opacity: 1;
+      transform: rotate(10deg) scale(1);
+    }
+
+
+    /* The Sunflower Head */
+    .flower-head {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      width: 140px;
+      height: 140px;
+      transition: transform 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) 1.5s;
+    }
+
+    .flower-box.active .flower-head {
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    .center {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 50px;
+      height: 50px;
+      background: radial-gradient(circle, #5d4037, #3e2723);
+      border-radius: 50%;
+      z-index: 20;
+      box-shadow: inset 0 0 15px rgba(0,0,0,0.6), 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    .petals-container {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      animation: slowRotate 25s linear infinite;
+      z-index: 10;
+    }
+
+    @keyframes slowRotate {
+      to { transform: rotate(360deg); }
+    }
+
+    .petal {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      width: 55px;
+      height: 90px;
+      background: var(--petal-color);
+      border-radius: 50% 50% 50% 50% / 80% 80% 30% 30%;
+      transform-origin: bottom center;
+      box-shadow: inset 0 -12px 18px var(--petal-shadow);
+      opacity: 0;
+      transition: opacity 0.8s ease, transform 1s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Message Styling */
+    .final-message {
+      margin-top: 10px;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #7a5d00;
+      opacity: 0;
+      transform: translateY(15px);
+      transition: all 0.8s ease 3.2s;
+      text-shadow: 0 2px 10px rgba(255, 215, 0, 0.3);
+    }
+
+    .flower-box.active + .final-message {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Button Styling - Sunflower Button with Lights */
+    .btn-container {
+      position: relative;
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn {
+      padding: 1.2rem 3rem;
+      font-family: inherit;
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: #6a5100;
+      background: linear-gradient(180deg, #fff47a 0%, #ffd42a 55%, #f0b900 100%);
+      border: 4px solid #e0a900;
+      border-radius: 60px;
+      cursor: pointer;
+      position: relative;
+      outline: none;
+      transition: transform 0.2s, box-shadow 0.2s;
+      animation: pulseBtn 2s infinite ease-in-out;
+      box-shadow: 
+        0 8px 15px rgba(244, 180, 0, 0.3),
+        inset 0 2px 5px rgba(255, 255, 255, 0.8);
+    }
+
+    /* "Lights" effect around the button */
+    .btn::before {
+      content: '';
+      position: absolute;
+      inset: -8px;
+      border-radius: 65px;
+      background: transparent;
+      box-shadow: 0 0 15px 3px var(--btn-glow);
+      animation: lightsFade 1.5s infinite alternate;
+      pointer-events: none;
+    }
+
+    @keyframes pulseBtn {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.06); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes lightsFade {
+      0% { opacity: 0.5; box-shadow: 0 0 10px 1px var(--btn-glow); }
+      100% { opacity: 1; box-shadow: 0 0 25px 6px var(--btn-glow); }
+    }
+
+    .btn:hover {
+      transform: scale(1.1) translateY(-3px);
+      box-shadow: 0 15px 25px rgba(244, 180, 0, 0.4);
+      animation-play-state: paused;
+    }
+
+    .btn:active {
+      transform: scale(0.92) translateY(1px);
+    }
+
+    .btn.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.6);
+      transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+    }
+
+    @media (max-width: 480px) {
+      .flower-box { height: 320px; }
+      .flower-box.active .stem { height: 200px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="blur blur-1"></div>
+  <div class="blur blur-2"></div>
+
+  <main class="container">
+    <div id="header">
+      <h1>Si no te regalaron una flor amarilla, te regalo una virtual</h1>
+    </div>
+
+    <div class="btn-container">
+      <button id="bloomBtn" class="btn">Presióname 🌻</button>
+    </div>
+
+    <div id="scene" class="flower-box">
+      <div class="stem">
+        <div class="leaf leaf-left"></div>
+        <div class="leaf leaf-right leaf-right-1"></div>
+        <div class="leaf leaf-right leaf-right-2"></div>
+        <div id="head" class="flower-head">
+          <div class="center"></div>
+          <div class="petals-container" id="petals"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="final-message" id="message">Espero te guste</div>
+  </main>
+
+  <script>
+    const petalsContainer = document.getElementById('petals');
+    const numPetals = 12;
+
+    // Generate Petals
+    for (let i = 0; i < numPetals; i++) {
+      const petal = document.createElement('div');
+      petal.className = 'petal';
+      const angle = (360 / numPetals) * i;
+      // Start hidden at bottom-center of the container
+      petal.style.transform = `translateX(-50%) rotate(${angle}deg) scale(0)`;
+      // Transition delay starts after the head appears
+      petal.style.transitionDelay = `${1.8 + (i * 0.1)}s`;
+      petalsContainer.appendChild(petal);
+    }
+
+    const bloomBtn = document.getElementById('bloomBtn');
+    const flowerBox = document.getElementById('scene');
+
+    bloomBtn.addEventListener('click', () => {
+      flowerBox.classList.add('active');
+      bloomBtn.classList.add('hidden');
+
+      // Final bloom state for petals
+      const petals = document.querySelectorAll('.petal');
+      petals.forEach((p, i) => {
+        const angle = (360 / numPetals) * i;
+        setTimeout(() => {
+          p.style.opacity = '1';
+          p.style.transform = `translateX(-50%) rotate(${angle}deg) scale(1)`;
+        }, 100); 
+      });
+    });
+  </script>
+</body>
+</html>
